@@ -119,8 +119,13 @@ fn main() {
         println!("===============");
 
         match run_iteration(&cli.prompt) {
-            Ok(_output) => {
-                // Completion detection will be added in US-006
+            Ok(output) => {
+                if output.contains("<promise>COMPLETE</promise>") {
+                    println!("Ralph completed all tasks!");
+                    println!("Completed at iteration {i} of {}", cli.max_iterations);
+                    std::process::exit(0);
+                }
+                println!("Iteration {i} complete. Continuing...");
             }
             Err(err) => {
                 eprintln!("Error: {err:#}");
@@ -133,4 +138,10 @@ fn main() {
             thread::sleep(Duration::from_secs(2));
         }
     }
+
+    eprintln!(
+        "Ralph reached max iterations ({}) without completing all tasks.",
+        cli.max_iterations
+    );
+    std::process::exit(1);
 }
