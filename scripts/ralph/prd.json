@@ -64,7 +64,7 @@
         "cargo clippy passes with no warnings"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -82,7 +82,7 @@
         "cargo clippy passes with no warnings"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Use std::process::Command with piped stdin/stdout. Write prompt to stdin then drop it. Read stdout with BufReader line-by-line."
     },
     {
@@ -98,7 +98,7 @@
         "cargo clippy passes with no warnings"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -113,8 +113,27 @@
         "cargo clippy passes with no warnings"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Tests go in tests/cli.rs"
+    },
+    {
+      "id": "US-008",
+      "title": "Write project README",
+      "description": "As a developer, I want a comprehensive README.md so that I can quickly understand how to set up, build, and run the Ralph loop on my local machine.",
+      "acceptanceCriteria": [
+        "A README.md file exists at the project root",
+        "Includes a brief project overview explaining what Ralph is and what it does",
+        "Documents prerequisites (Rust toolchain, claude CLI installed and authenticated)",
+        "Provides step-by-step local development setup instructions (git clone, cargo build)",
+        "Explains how to run the binary with examples (cargo run, ralph [max_iterations], ralph --prompt path/to/prompt.md)",
+        "Documents all CLI flags and arguments (--help, --version, --prompt, max_iterations)",
+        "Includes a file structure overview showing key files and their purpose (src/main.rs, scripts/ralph/prd.json, scripts/ralph/CLAUDE.md, tasks/prd-ralph-loop-rs.md)",
+        "Documents exit codes (0 = complete, 1 = error or max iterations reached)",
+        "cargo clippy passes with no warnings"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
     }
   ]
 }
