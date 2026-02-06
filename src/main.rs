@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use chrono::Local;
 use clap::Parser;
 use serde::Deserialize;
 use std::path::PathBuf;
@@ -41,6 +42,16 @@ fn load_prd() -> Result<Prd> {
     Ok(prd)
 }
 
+fn init_progress_file() -> Result<()> {
+    let path = PathBuf::from("progress.txt");
+    if !path.exists() {
+        let now = Local::now();
+        let header = format!("# Ralph Progress Log\nStarted: {now}\n---\n");
+        std::fs::write(&path, header).with_context(|| "Failed to create progress.txt")?;
+    }
+    Ok(())
+}
+
 fn main() {
     let cli = Cli::parse();
 
@@ -51,6 +62,11 @@ fn main() {
             std::process::exit(1);
         }
     };
+
+    if let Err(err) = init_progress_file() {
+        eprintln!("Error: {err:#}");
+        std::process::exit(1);
+    }
 
     println!(
         "max_iterations: {}, prompt: {}, branch: {}, stories: {}",
