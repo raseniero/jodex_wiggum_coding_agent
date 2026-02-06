@@ -90,6 +90,20 @@ Rewrite the core Ralph Wiggum autonomous agent loop as a Rust CLI application. R
 - [ ] All tests pass with `cargo test`
 - [ ] `cargo clippy` passes with no warnings
 
+### US-008: Write project README
+**Description:** As a developer, I want a comprehensive README.md so that I can quickly understand how to set up, build, and run the Ralph loop on my local machine.
+
+**Acceptance Criteria:**
+- [ ] A `README.md` file exists at the project root
+- [ ] Includes a brief project overview explaining what Ralph is and what it does
+- [ ] Documents prerequisites (Rust toolchain, `claude` CLI installed and authenticated)
+- [ ] Provides step-by-step local development setup instructions (`git clone`, `cargo build`)
+- [ ] Explains how to run the binary with examples (`cargo run`, `ralph [max_iterations]`, `ralph --prompt path/to/prompt.md`)
+- [ ] Documents all CLI flags and arguments (`--help`, `--version`, `--prompt`, `max_iterations`)
+- [ ] Includes a file structure overview showing key files and their purpose (`src/main.rs`, `scripts/ralph/prd.json`, `scripts/ralph/CLAUDE.md`, `tasks/prd-ralph-loop-rs.md`)
+- [ ] Documents exit codes (0 = complete, 1 = error or max iterations reached)
+- [ ] `cargo clippy` passes with no warnings
+
 ## Functional Requirements
 
 - FR-1: The binary is named `ralph` and is invoked as `ralph [OPTIONS] [max_iterations]`

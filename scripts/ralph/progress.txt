@@ -107,3 +107,12 @@ Started: Fri Feb  6 01:02:17 PST 2026
   - `predicates::str::contains()` works with `.stderr()` and `.stdout()` for assertion matching
   - Integration tests need `current_dir()` set to a temp directory to isolate from project files (e.g., avoid finding project's own prd.json)
 ---
+
+## 2026-02-06 - US-008
+- Created README.md at the project root
+- Includes project overview, prerequisites, setup instructions, usage examples, CLI arguments table, exit codes table, file structure overview, and how-it-works explanation
+- Files changed: README.md
+- **Learnings for future iterations:**
+  - This was a documentation-only story — no code changes needed, so clippy and tests pass without modification
+  - The file structure section references `scripts/ralph/` which contains the operational prd.json/CLAUDE.md/progress.txt used by the ralph.sh bash script
+---
