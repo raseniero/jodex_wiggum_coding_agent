@@ -2,7 +2,11 @@ use anyhow::{Context, Result};
 use chrono::Local;
 use clap::Parser;
 use serde::Deserialize;
+use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
+use std::process::{Command, Stdio};
+use std::thread;
+use std::time::Duration;
 
 /// Ralph Wiggum Loop RS — autonomous agent loop that reads prd.json,
 /// invokes Claude Code iteratively, detects completion, and tracks progress.
@@ -20,6 +24,7 @@ struct Cli {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 struct Prd {
     branch_name: String,
     user_stories: Vec<UserStory>,
@@ -52,10 +57,50 @@ fn init_progress_file() -> Result<()> {
     Ok(())
 }
 
+/// Run a single iteration: read the prompt file, pipe it to claude, stream output.
+/// Returns the accumulated stdout as a String.
+fn run_iteration(prompt_path: &PathBuf) -> Result<String> {
+    let prompt_contents = std::fs::read_to_string(prompt_path)
+        .with_context(|| format!("Failed to read prompt file '{}'", prompt_path.display()))?;
+
+    let mut child = Command::new("claude")
+        .args(["--dangerously-skip-permissions", "--print"])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::inherit())
+        .spawn()
+        .with_context(|| "Failed to spawn 'claude' — is it installed and on your PATH?")?;
+
+    // Write prompt to stdin, then drop to close it
+    if let Some(mut stdin) = child.stdin.take() {
+        stdin
+            .write_all(prompt_contents.as_bytes())
+            .with_context(|| "Failed to write prompt to claude stdin")?;
+    }
+
+    // Stream stdout line-by-line (tee behavior) while accumulating
+    let mut accumulated = String::new();
+    if let Some(stdout) = child.stdout.take() {
+        let reader = BufReader::new(stdout);
+        for line in reader.lines() {
+            let line = line.with_context(|| "Failed to read line from claude stdout")?;
+            println!("{line}");
+            accumulated.push_str(&line);
+            accumulated.push('\n');
+        }
+    }
+
+    child
+        .wait()
+        .with_context(|| "Failed to wait for claude process")?;
+
+    Ok(accumulated)
+}
+
 fn main() {
     let cli = Cli::parse();
 
-    let prd = match load_prd() {
+    let _prd = match load_prd() {
         Ok(prd) => prd,
         Err(err) => {
             eprintln!("Error: {err:#}");
@@ -68,11 +113,24 @@ fn main() {
         std::process::exit(1);
     }
 
-    println!(
-        "max_iterations: {}, prompt: {}, branch: {}, stories: {}",
-        cli.max_iterations,
-        cli.prompt.display(),
-        prd.branch_name,
-        prd.user_stories.len()
-    );
+    for i in 1..=cli.max_iterations {
+        println!("===============");
+        println!("  Ralph Iteration {i} of {} (claude)", cli.max_iterations);
+        println!("===============");
+
+        match run_iteration(&cli.prompt) {
+            Ok(_output) => {
+                // Completion detection will be added in US-006
+            }
+            Err(err) => {
+                eprintln!("Error: {err:#}");
+                std::process::exit(1);
+            }
+        }
+
+        // Sleep between iterations (skip sleep after last iteration)
+        if i < cli.max_iterations {
+            thread::sleep(Duration::from_secs(2));
+        }
+    }
 }
