@@ -15,6 +15,30 @@ cd agentic_loop_rs
 cargo build
 ```
 
+## Building a Release Binary
+
+Build an optimized release binary:
+
+```bash
+cargo build --release
+```
+
+The binary will be at `target/release/ralph`.
+
+### Optimized for Apple Silicon (M1/M2/M3/M4)
+
+To produce a binary fully tuned for your specific Mac chip, add `target-cpu=native`:
+
+```bash
+RUSTFLAGS="-C target-cpu=native" cargo build --release
+```
+
+This enables all CPU-specific instructions (NEON SIMD, etc.) available on your hardware, producing the fastest possible binary for your machine.
+
+> **Note:** Binaries built with `target-cpu=native` are tied to your CPU generation. If you need to distribute to other Macs, omit the `RUSTFLAGS` so the binary stays compatible with all `aarch64-apple-darwin` targets.
+
+The release profile in `Cargo.toml` already includes LTO, single codegen unit, symbol stripping, and abort-on-panic for maximum optimization.
+
 ## Usage
 
 Run with default settings (10 iterations, prompt from `CLAUDE.md`):

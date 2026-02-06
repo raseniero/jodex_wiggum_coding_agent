@@ -1,1 +1,34 @@
+# Build artifacts
 /target
+
+# Cargo lock for binaries is usually committed, but ignore for libraries
+# Cargo.lock  # Uncomment if this becomes a library crate
+
+# Backup files
+**/*.rs.bk
+
+# Editor/IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment and secrets
+.env
+.env.*
+
+# Debug files
+*.pdb
+*.dSYM/
+
+# Profiling data
+perf.data
+perf.data.old
+flamegraph.svg
+cachegrind.out.*
+callgrind.out.*
+
+# Obsidian files
+.obsidian/

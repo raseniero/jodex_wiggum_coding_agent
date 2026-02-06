@@ -13,3 +13,10 @@ anyhow = "1"
 [dev-dependencies]
 assert_cmd = "2"
 predicates = "3"
+
+[profile.release]
+opt-level = 3          # Max optimization (already the default for release)
+lto = true             # Link-Time Optimization — slower build, faster/smaller binary
+codegen-units = 1      # Single codegen unit — better optimization, slower compile
+strip = true           # Strip symbols — smaller binary
+panic = "abort"        # Abort on panic instead of unwinding — smaller binary
