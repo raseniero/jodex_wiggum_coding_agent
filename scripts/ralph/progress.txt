@@ -1,3 +1,49 @@
+## Codebase Patterns
+- Edition is 2021 in Cargo.toml
+- Project root contains Cargo.toml and src/main.rs (standard binary layout)
+- Use `anyhow` for error handling throughout
+- Use `#[serde(rename_all = "camelCase")]` for JSON structs matching prd.json
+- Error pattern: `eprintln!("Error: {err:#}"); std::process::exit(1);` for fatal errors in main
+
 # Ralph Progress Log
 Started: Fri Feb  6 01:02:17 PST 2026
+---
+
+## 2026-02-06 - US-001
+- Initialized Cargo project with `cargo init --name ralph`
+- Added all required dependencies: clap (v4, derive), serde (v1, derive), serde_json (v1), chrono (v0.4), anyhow (v1)
+- Added dev-dependency: assert_cmd (v2)
+- Created .gitignore for /target
+- Files changed: Cargo.toml, src/main.rs, .gitignore
+- **Learnings for future iterations:**
+  - `cargo init` with latest Rust stable uses edition "2024" by default; changed to "2021" per PRD requirements
+  - Git repo was not initialized — had to run `git init` before any git operations
+  - Branch created: `ralph/ralph-loop-rs` as specified in prd.json
+---
+
+## 2026-02-06 - US-002
+- Implemented CLI argument parsing using clap derive API
+- Optional positional `max_iterations` (u32, default 10)
+- Optional `--prompt` flag for agent prompt file path (default: CLAUDE.md)
+- `--help` and `--version` work correctly
+- Invalid arguments produce clear error messages
+- Files changed: src/main.rs
+- **Learnings for future iterations:**
+  - clap derive API with `#[command(version, about)]` auto-pulls version from Cargo.toml and description from doc comment
+  - `#[arg(default_value_t = 10)]` for numeric defaults, `#[arg(default_value = "...")]` for string/path defaults
+  - clap automatically handles error messages for type mismatches (e.g. non-numeric input for u32)
+---
+
+## 2026-02-06 - US-003
+- Added `Prd` and `UserStory` structs with serde deserialization
+- Implemented `load_prd()` function that reads and validates prd.json from the current working directory
+- Missing prd.json prints error to stderr and exits with code 1
+- Malformed JSON prints error to stderr and exits with code 1
+- Used `#[serde(rename_all = "camelCase")]` for JSON field mapping
+- Used `anyhow::Context` for clear, chained error messages
+- Files changed: src/main.rs
+- **Learnings for future iterations:**
+  - `#[allow(dead_code)]` on structs suppresses unused field warnings for deserialization structs whose fields aren't yet consumed
+  - `anyhow::Context::with_context` provides clean error chaining for user-facing messages
+  - `eprintln!("Error: {err:#}")` with `#` displays the full anyhow error chain on one line
 ---

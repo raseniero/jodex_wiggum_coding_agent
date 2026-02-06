@@ -16,7 +16,7 @@
         "cargo clippy passes with no warnings"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -33,7 +33,7 @@
         "cargo clippy passes with no warnings"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -50,7 +50,7 @@
         "cargo clippy passes with no warnings"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
