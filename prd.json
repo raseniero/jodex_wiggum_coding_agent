@@ -1,138 +1,71 @@
 {
-  "project": "Ralph Wiggum Loop RS",
-  "branchName": "ralph/ralph-loop-rs",
-  "description": "Minimal Rust CLI that implements the core Ralph Wiggum autonomous agent loop — reads prd.json, invokes Claude Code iteratively, detects completion, and tracks progress.",
+  "project": "CasaColinaCare",
+  "featureName": "contact-information-update-fax-addition",
+  "featureId": "12345",
+  "description": "Contact Information Update & Fax Addition — Fix placeholder phone, add fax number, correct street spelling and postal city across all pages",
+  "detailedPrdPath": "PRD.md",
+  "technicalSpecPath": "TECH_SPEC.md",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Initialize Cargo project",
-      "description": "As a developer, I want a properly structured Rust project so that I can build and extend the Ralph loop.",
+      "title": "Update Schema.org Structured Data — Phone, Fax, Address",
+      "description": "As a search engine crawler, I want accurate phone, fax, and address data in the JSON-LD structured data so that Google Knowledge Panel and local search results display correct contact information",
+      "technicalSpecSection": "#32-us-001-update-schemaorg-structured-data",
       "acceptanceCriteria": [
-        "cargo init creates a binary project at the repo root with Cargo.toml and src/main.rs",
-        "Project name is 'ralph' in Cargo.toml",
-        "Add dependencies: clap (v4, derive feature), serde (v1, derive feature), serde_json (v1), chrono (v0.4), anyhow (v1)",
-        "Add dev-dependency: assert_cmd (v2)",
-        "cargo build succeeds with no errors",
-        "cargo clippy passes with no warnings"
+        "The `telephone` field in JSON-LD is `'+18082001840'` and the old value `'+18008888888'` does not exist anywhere in the file",
+        "The `faxNumber` field in JSON-LD is `'+18086701163'` and is positioned after `telephone` and before `email`",
+        "The `streetAddress` field is `'189 Anapalau Street'` with no `(Hawaii Kai)` appended, and old value `'189 Anapalua Street'` does not exist",
+        "The `addressLocality` field is `'Honolulu'` and old value `'Hawaii Kai'` does not exist in `PostalAddress`",
+        "Typecheck passes (`npm run type-check` exits 0)",
+        "Lint passes (`npm run lint` exits 0)",
+        "Unit test added (`tests/unit/structured-data.test.ts`) and passes",
+        "E2E test added (`tests/e2e/structured-data.spec.ts`) and passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": ""
+      "notes": "Completed 2026-02-14. Extracted jsonLd to src/lib/structured-data.ts for testability."
     },
     {
       "id": "US-002",
-      "title": "Parse CLI arguments with clap",
-      "description": "As a user, I want to run ralph [max_iterations] with sensible defaults so that I can control how many iterations to run.",
+      "title": "Update Contact Page — Phone, Fax, and Address",
+      "description": "As a visitor on the Contact page, I want to see the correct phone number, a fax number, and the updated address so that I can reach the facility through the right channels",
+      "technicalSpecSection": "#33-us-002-update-contact-page--phone-fax-and-address",
       "acceptanceCriteria": [
-        "Uses the clap crate with derive API for argument parsing",
-        "Accepts an optional positional argument max_iterations (u32, default: 10)",
-        "Accepts an optional --prompt flag to specify the path to the agent prompt file (default: CLAUDE.md in the current directory)",
-        "ralph --help displays usage information",
-        "ralph --version displays version from Cargo.toml",
-        "Invalid arguments produce a clear error message",
-        "cargo clippy passes with no warnings"
+        "Phone link `href` is `'tel:+18082001840'` and display text is `'+1 (808) 200-1840'`; old phone `'+1 (800) 888-8888'` does not exist",
+        "Fax block exists between Phone and Email blocks with display text `'+1 (808) 670-1163'`",
+        "Fax number is rendered as plain text (NOT wrapped in an `<a>` tag) and is NOT a clickable link",
+        "Fax block uses the `Phone` icon from lucide-react, has label `\"Fax\"`, and styling matches the Phone block",
+        "Street address displays `'189 Anapalau Street (Hawaii Kai)'`; old street `'189 Anapalua Street'` does not exist",
+        "City displays `'Honolulu, HI 96825'`; old value `'Hawaii Kai, HI 96825'` does not exist",
+        "Typecheck passes (`npm run type-check` exits 0)",
+        "Lint passes (`npm run lint` exits 0)",
+        "Unit test added (`tests/unit/contact-page.test.tsx`) and passes",
+        "E2E test added (`tests/e2e/contact-info.spec.ts`) and passes",
+        "Verified in browser using dev-browser skill"
       ],
       "priority": 2,
       "passes": true,
-      "notes": ""
+      "notes": "Completed 2026-02-16. Updated phone, added fax block, corrected street/city. Unit (6/6) and E2E (3/3) tests pass."
     },
     {
       "id": "US-003",
-      "title": "Read and validate prd.json",
-      "description": "As the Ralph loop, I need to verify that a prd.json file exists and is valid before starting so that the agent has work to do.",
+      "title": "Update Footer — Phone, Fax, and Address",
+      "description": "As a visitor on any page, I want the footer to show the correct phone number, fax number, street address, and city so that I have accurate contact and location information available site-wide",
+      "technicalSpecSection": "#34-us-003-update-footer--phone-fax-and-address",
       "acceptanceCriteria": [
-        "On startup, checks for prd.json in the current working directory",
-        "If prd.json is missing, prints a clear error message to stderr and exits with code 1",
-        "If prd.json exists, reads and deserializes it using serde_json into a Prd struct",
-        "The Prd struct captures: branchName (String) and userStories (Vec with id, title, and passes fields)",
-        "Use #[serde(rename_all = camelCase)] for JSON field mapping",
-        "Malformed JSON produces a clear error message to stderr and exits with code 1",
-        "cargo clippy passes with no warnings"
+        "Footer phone link `href` is `'tel:+18082001840'` and display text is `'+1 (808) 200-1840'`; old phone does not exist",
+        "Footer fax entry exists with display text `'+1 (808) 670-1163'` and label `\"Fax\"`",
+        "Footer fax number is rendered as plain text (NOT wrapped in an `<a>` tag) and is NOT a clickable link",
+        "Footer street address displays `'189 Anapalau Street (Hawaii Kai)'`; old street does not exist",
+        "Footer city displays `'Honolulu, HI 96825'`; old value `'Hawaii Kai, HI 96825'` does not exist",
+        "Typecheck passes (`npm run type-check` exits 0)",
+        "Lint passes (`npm run lint` exits 0)",
+        "Unit test added (`tests/unit/footer.test.tsx`) and passes",
+        "E2E test added (`tests/e2e/footer-contact.spec.ts`) and passes",
+        "Verified in browser using dev-browser skill"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-004",
-      "title": "Initialize progress.txt file",
-      "description": "As the Ralph loop, I need to create or verify a progress.txt file so that iteration results are logged.",
-      "acceptanceCriteria": [
-        "If progress.txt does not exist in the current directory, creates it with header: '# Ralph Progress Log\\nStarted: <datetime>\\n---\\n'",
-        "If progress.txt already exists, leaves it untouched",
-        "Uses the chrono crate for datetime formatting (Local::now)",
-        "cargo clippy passes with no warnings"
-      ],
-      "priority": 4,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-005",
-      "title": "Implement core iteration loop with Claude Code",
-      "description": "As the Ralph loop, I want to run Claude Code up to N times, piping the prompt file via stdin and capturing output, so that stories get implemented autonomously.",
-      "acceptanceCriteria": [
-        "Loops from 1 to max_iterations",
-        "Each iteration prints a banner: '===============\\n  Ralph Iteration {i} of {max} (claude)\\n==============='",
-        "Reads the prompt file (from --prompt path) and pipes its contents to stdin of 'claude --dangerously-skip-permissions --print'",
-        "Captures stdout from the claude process",
-        "Streams output to the terminal in real-time (tee behavior via BufReader line-by-line) while also accumulating into a String for completion detection",
-        "If the process fails to spawn (e.g. claude not found), prints a clear error to stderr and exits with code 1",
-        "After each iteration, sleeps for 2 seconds before the next",
-        "cargo clippy passes with no warnings"
-      ],
-      "priority": 5,
-      "passes": true,
-      "notes": "Use std::process::Command with piped stdin/stdout. Write prompt to stdin then drop it. Read stdout with BufReader line-by-line."
-    },
-    {
-      "id": "US-006",
-      "title": "Detect completion signal and exit appropriately",
-      "description": "As the Ralph loop, I want to detect <promise>COMPLETE</promise> in the agent output so that I stop early when all stories are done.",
-      "acceptanceCriteria": [
-        "After each iteration, checks the accumulated output for the string '<promise>COMPLETE</promise>'",
-        "If found, prints 'Ralph completed all tasks!' and 'Completed at iteration {i} of {max}'",
-        "Exits with code 0 on completion",
-        "If not found, prints 'Iteration {i} complete. Continuing...' and proceeds to the next iteration",
-        "If all iterations exhaust without completion, prints 'Ralph reached max iterations ({max}) without completing all tasks.' and exits with code 1",
-        "cargo clippy passes with no warnings"
-      ],
-      "priority": 6,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-007",
-      "title": "Add integration tests",
-      "description": "As a developer, I want basic integration tests so that I can verify the CLI behavior works correctly.",
-      "acceptanceCriteria": [
-        "Test verifies that running ralph without a prd.json exits with code 1 and stderr contains an error message",
-        "Test verifies CLI --help output contains expected program description",
-        "Tests use assert_cmd crate for CLI subprocess testing",
-        "All tests pass with cargo test",
-        "cargo clippy passes with no warnings"
-      ],
-      "priority": 7,
-      "passes": true,
-      "notes": "Tests go in tests/cli.rs"
-    },
-    {
-      "id": "US-008",
-      "title": "Write project README",
-      "description": "As a developer, I want a comprehensive README.md so that I can quickly understand how to set up, build, and run the Ralph loop on my local machine.",
-      "acceptanceCriteria": [
-        "A README.md file exists at the project root",
-        "Includes a brief project overview explaining what Ralph is and what it does",
-        "Documents prerequisites (Rust toolchain, claude CLI installed and authenticated)",
-        "Provides step-by-step local development setup instructions (git clone, cargo build)",
-        "Explains how to run the binary with examples (cargo run, ralph [max_iterations], ralph --prompt path/to/prompt.md)",
-        "Documents all CLI flags and arguments (--help, --version, --prompt, max_iterations)",
-        "Includes a file structure overview showing key files and their purpose (src/main.rs, scripts/ralph/prd.json, scripts/ralph/CLAUDE.md, tasks/prd-ralph-loop-rs.md)",
-        "Documents exit codes (0 = complete, 1 = error or max iterations reached)",
-        "cargo clippy passes with no warnings"
-      ],
-      "priority": 8,
-      "passes": true,
+      "passes": false,
       "notes": ""
     }
   ]

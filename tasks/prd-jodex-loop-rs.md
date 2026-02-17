@@ -1,12 +1,12 @@
-# PRD: Ralph Wiggum Loop - Rust CLI
+# PRD: Jodex Wiggum Loop - Rust CLI
 
 ## Introduction
 
-Rewrite the core Ralph Wiggum autonomous agent loop as a Rust CLI application. Ralph is a long-running loop that repeatedly invokes Claude Code to work through user stories defined in a `prd.json` file. Each iteration feeds the agent its instructions, captures output, checks for a completion signal, and tracks progress. This Rust version is a minimal MVP focused on the core loop with Claude Code as the only backend.
+Rewrite the core Jodex Wiggum autonomous agent loop as a Rust CLI application. Jodex is a long-running loop that repeatedly invokes Claude Code to work through user stories defined in a `prd.json` file. Each iteration feeds the agent its instructions, captures output, checks for a completion signal, and tracks progress. This Rust version is a minimal MVP focused on the core loop with Claude Code as the only backend.
 
 ## Goals
 
-- Provide a compiled, single-binary Rust CLI that replaces the bash `ralph.sh` script for the Claude Code workflow
+- Provide a compiled, single-binary Rust CLI that replaces the bash `jodex.sh` script for the Claude Code workflow
 - Read a `prd.json` file to know what work needs to be done
 - Run up to N iterations, invoking `claude --dangerously-skip-permissions --print` each time with the agent prompt piped via stdin
 - Detect the `<promise>COMPLETE</promise>` signal in agent output and exit early on success
@@ -16,28 +16,28 @@ Rewrite the core Ralph Wiggum autonomous agent loop as a Rust CLI application. R
 ## User Stories
 
 ### US-001: Initialize Cargo project
-**Description:** As a developer, I want a properly structured Rust project so that I can build and extend the Ralph loop.
+**Description:** As a developer, I want a properly structured Rust project so that I can build and extend the Jodex loop.
 
 **Acceptance Criteria:**
 - [ ] `cargo init` creates a binary project at the repo root with `Cargo.toml` and `src/main.rs`
-- [ ] Project name is `ralph` in Cargo.toml
+- [ ] Project name is `jodex` in Cargo.toml
 - [ ] `cargo build` succeeds with no errors
 - [ ] `cargo clippy` passes with no warnings
 
 ### US-002: Parse CLI arguments
-**Description:** As a user, I want to run `ralph [max_iterations]` with sensible defaults so that I can control how many iterations to run.
+**Description:** As a user, I want to run `jodex [max_iterations]` with sensible defaults so that I can control how many iterations to run.
 
 **Acceptance Criteria:**
 - [ ] Uses the `clap` crate with derive API for argument parsing
 - [ ] Accepts an optional positional argument `max_iterations` (u32, default: 10)
 - [ ] Accepts an optional `--prompt` flag to specify the path to the agent prompt file (default: `CLAUDE.md` in the same directory as the binary, falling back to current directory)
-- [ ] `ralph --help` displays usage information
-- [ ] `ralph --version` displays version from Cargo.toml
+- [ ] `jodex --help` displays usage information
+- [ ] `jodex --version` displays version from Cargo.toml
 - [ ] Invalid arguments produce a clear error message
 - [ ] `cargo clippy` passes with no warnings
 
 ### US-003: Read prd.json file
-**Description:** As the Ralph loop, I need to verify that a `prd.json` file exists before starting so that the agent has work to do.
+**Description:** As the Jodex loop, I need to verify that a `prd.json` file exists before starting so that the agent has work to do.
 
 **Acceptance Criteria:**
 - [ ] On startup, checks for `prd.json` in the current working directory
@@ -48,20 +48,20 @@ Rewrite the core Ralph Wiggum autonomous agent loop as a Rust CLI application. R
 - [ ] `cargo clippy` passes with no warnings
 
 ### US-004: Initialize progress.txt
-**Description:** As the Ralph loop, I need to create or verify a `progress.txt` file so that iteration results are logged.
+**Description:** As the Jodex loop, I need to create or verify a `progress.txt` file so that iteration results are logged.
 
 **Acceptance Criteria:**
-- [ ] If `progress.txt` does not exist in the current directory, creates it with a header: `# Ralph Progress Log\nStarted: <datetime>\n---\n`
+- [ ] If `progress.txt` does not exist in the current directory, creates it with a header: `# Jodex Progress Log\nStarted: <datetime>\n---\n`
 - [ ] If `progress.txt` already exists, leaves it untouched
 - [ ] Uses the `chrono` crate (or `std::time`) for datetime formatting
 - [ ] `cargo clippy` passes with no warnings
 
 ### US-005: Execute the core iteration loop
-**Description:** As the Ralph loop, I want to run Claude Code up to N times, piping the prompt file via stdin and capturing output, so that stories get implemented autonomously.
+**Description:** As the Jodex loop, I want to run Claude Code up to N times, piping the prompt file via stdin and capturing output, so that stories get implemented autonomously.
 
 **Acceptance Criteria:**
 - [ ] Loops from 1 to `max_iterations`
-- [ ] Each iteration prints a banner: `===============\n  Ralph Iteration {i} of {max} (claude)\n===============`
+- [ ] Each iteration prints a banner: `===============\n  Jodex Iteration {i} of {max} (claude)\n===============`
 - [ ] Reads the prompt file (from `--prompt` path) and pipes its contents to stdin of `claude --dangerously-skip-permissions --print`
 - [ ] Captures stdout and stderr from the claude process
 - [ ] Streams output to the terminal in real-time (tee behavior) while also capturing it for completion detection
@@ -70,43 +70,43 @@ Rewrite the core Ralph Wiggum autonomous agent loop as a Rust CLI application. R
 - [ ] `cargo clippy` passes with no warnings
 
 ### US-006: Detect completion signal
-**Description:** As the Ralph loop, I want to detect `<promise>COMPLETE</promise>` in the agent's output so that I stop early when all stories are done.
+**Description:** As the Jodex loop, I want to detect `<promise>COMPLETE</promise>` in the agent's output so that I stop early when all stories are done.
 
 **Acceptance Criteria:**
 - [ ] After each iteration, checks the captured output for the string `<promise>COMPLETE</promise>`
-- [ ] If found, prints "Ralph completed all tasks!" and "Completed at iteration {i} of {max}"
+- [ ] If found, prints "Jodex completed all tasks!" and "Completed at iteration {i} of {max}"
 - [ ] Exits with code 0 on completion
 - [ ] If not found, prints "Iteration {i} complete. Continuing..." and proceeds to the next iteration
-- [ ] If all iterations exhaust without completion, prints "Ralph reached max iterations ({max}) without completing all tasks." and exits with code 1
+- [ ] If all iterations exhaust without completion, prints "Jodex reached max iterations ({max}) without completing all tasks." and exits with code 1
 - [ ] `cargo clippy` passes with no warnings
 
 ### US-007: Integration test with mock
 **Description:** As a developer, I want a basic integration test so that I can verify the loop logic works end-to-end.
 
 **Acceptance Criteria:**
-- [ ] Test verifies that running `ralph` without a `prd.json` exits with code 1 and prints an error
+- [ ] Test verifies that running `jodex` without a `prd.json` exits with code 1 and prints an error
 - [ ] Test verifies CLI `--help` output contains expected program description
 - [ ] Tests use `assert_cmd` crate for CLI testing
 - [ ] All tests pass with `cargo test`
 - [ ] `cargo clippy` passes with no warnings
 
 ### US-008: Write project README
-**Description:** As a developer, I want a comprehensive README.md so that I can quickly understand how to set up, build, and run the Ralph loop on my local machine.
+**Description:** As a developer, I want a comprehensive README.md so that I can quickly understand how to set up, build, and run the Jodex loop on my local machine.
 
 **Acceptance Criteria:**
 - [ ] A `README.md` file exists at the project root
-- [ ] Includes a brief project overview explaining what Ralph is and what it does
+- [ ] Includes a brief project overview explaining what Jodex is and what it does
 - [ ] Documents prerequisites (Rust toolchain, `claude` CLI installed and authenticated)
 - [ ] Provides step-by-step local development setup instructions (`git clone`, `cargo build`)
-- [ ] Explains how to run the binary with examples (`cargo run`, `ralph [max_iterations]`, `ralph --prompt path/to/prompt.md`)
+- [ ] Explains how to run the binary with examples (`cargo run`, `jodex [max_iterations]`, `jodex --prompt path/to/prompt.md`)
 - [ ] Documents all CLI flags and arguments (`--help`, `--version`, `--prompt`, `max_iterations`)
-- [ ] Includes a file structure overview showing key files and their purpose (`src/main.rs`, `scripts/ralph/prd.json`, `scripts/ralph/CLAUDE.md`, `tasks/prd-ralph-loop-rs.md`)
+- [ ] Includes a file structure overview showing key files and their purpose (`src/main.rs`, `scripts/jodex/prd.json`, `scripts/jodex/CLAUDE.md`, `tasks/prd-jodex-loop-rs.md`)
 - [ ] Documents exit codes (0 = complete, 1 = error or max iterations reached)
 - [ ] `cargo clippy` passes with no warnings
 
 ## Functional Requirements
 
-- FR-1: The binary is named `ralph` and is invoked as `ralph [OPTIONS] [max_iterations]`
+- FR-1: The binary is named `jodex` and is invoked as `jodex [OPTIONS] [max_iterations]`
 - FR-2: Default max iterations is 10 if not specified
 - FR-3: On startup, validate that `prd.json` exists and is valid JSON in the current directory
 - FR-4: Initialize `progress.txt` with a timestamped header if it does not exist

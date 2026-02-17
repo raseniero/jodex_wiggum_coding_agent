@@ -1,6 +1,6 @@
-# Ralph Wiggum Loop RS
+# Jodex Wiggum Loop RS
 
-A minimal Rust CLI that implements the core Ralph Wiggum autonomous agent loop. Ralph reads a `prd.json` file, invokes Claude Code iteratively, detects a completion signal, and tracks progress in a log file.
+A minimal Rust CLI that implements the core Jodex Wiggum autonomous agent loop. Jodex reads a `prd.json` file, invokes Claude Code iteratively, detects a completion signal, and tracks progress in a log file.
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ Build an optimized release binary:
 cargo build --release
 ```
 
-The binary will be at `target/release/ralph`.
+The binary will be at `target/release/jodex`.
 
 ### Optimized for Apple Silicon (M1/M2/M3/M4)
 
@@ -50,21 +50,21 @@ cargo run
 Run the compiled binary directly:
 
 ```bash
-ralph
+jodex
 ```
 
 Specify a custom number of iterations:
 
 ```bash
-ralph 20
+jodex 20
 cargo run -- 20
 ```
 
 Specify a custom prompt file:
 
 ```bash
-ralph --prompt path/to/prompt.md
-ralph --prompt path/to/prompt.md 15
+jodex --prompt path/to/prompt.md
+jodex --prompt path/to/prompt.md 15
 ```
 
 ## CLI Arguments
@@ -90,18 +90,18 @@ agentic_loop_rs/
 ├── src/main.rs                  # Main binary — CLI parsing, loop, completion detection
 ├── tests/cli.rs                 # Integration tests using assert_cmd
 ├── Cargo.toml                   # Project manifest and dependencies
-├── scripts/ralph/
+├── scripts/jodex/
 │   ├── prd.json                 # PRD defining user stories for the agent
 │   ├── CLAUDE.md                # Agent prompt/instructions for Claude Code
 │   ├── progress.txt             # Progress log (created/appended by the agent)
-│   └── ralph.sh                 # Original bash script (reference)
+│   └── jodex.sh                 # Original bash script (reference)
 └── tasks/
-    └── prd-ralph-loop-rs.md     # Human-readable PRD document
+    └── prd-jodex-loop-rs.md     # Human-readable PRD document
 ```
 
 ## How It Works
 
-1. Ralph reads and validates `prd.json` from the current working directory
+1. Jodex reads and validates `prd.json` from the current working directory
 2. Initializes `progress.txt` if it doesn't already exist
 3. Loops up to `max_iterations` times:
    - Reads the prompt file and pipes it to `claude --dangerously-skip-permissions --print` via stdin

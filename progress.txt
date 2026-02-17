@@ -10,7 +10,7 @@
 - Integration tests go in `tests/cli.rs`; use `assert_cmd::cargo_bin_cmd!` macro (not deprecated `Command::cargo_bin`)
 - Use `predicates` crate (v3) for assertion matchers with assert_cmd
 
-# Ralph Progress Log
+# Jodex Progress Log
 Started: Fri Feb  6 01:02:17 PST 2026
 ---
 

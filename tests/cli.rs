@@ -2,7 +2,7 @@ use assert_cmd::cargo_bin_cmd;
 
 #[test]
 fn missing_prd_json_exits_with_error() {
-    let temp = std::env::temp_dir().join("ralph_test_no_prd");
+    let temp = std::env::temp_dir().join("jodex_test_no_prd");
     std::fs::create_dir_all(&temp).unwrap();
 
     // Ensure no prd.json exists in the temp directory
@@ -11,7 +11,7 @@ fn missing_prd_json_exits_with_error() {
         std::fs::remove_file(&prd_path).unwrap();
     }
 
-    cargo_bin_cmd!("ralph")
+    cargo_bin_cmd!("jodex")
         .current_dir(&temp)
         .assert()
         .failure()
@@ -21,7 +21,7 @@ fn missing_prd_json_exits_with_error() {
 
 #[test]
 fn help_displays_program_description() {
-    cargo_bin_cmd!("ralph")
+    cargo_bin_cmd!("jodex")
         .arg("--help")
         .assert()
         .success()

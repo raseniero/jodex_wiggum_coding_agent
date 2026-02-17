@@ -8,7 +8,7 @@ use std::process::{Command, Stdio};
 use std::thread;
 use std::time::Duration;
 
-/// Ralph Wiggum Loop RS — autonomous agent loop that reads prd.json,
+/// Jodex Wiggum Loop RS — autonomous agent loop that reads prd.json,
 /// invokes Claude Code iteratively, detects completion, and tracks progress.
 #[derive(Parser, Debug)]
 #[command(version, about)]
@@ -26,7 +26,7 @@ struct Cli {
 #[serde(rename_all = "camelCase")]
 #[allow(dead_code)]
 struct Prd {
-    branch_name: String,
+    feature_name: String,
     user_stories: Vec<UserStory>,
 }
 
@@ -51,7 +51,7 @@ fn init_progress_file() -> Result<()> {
     let path = PathBuf::from("progress.txt");
     if !path.exists() {
         let now = Local::now();
-        let header = format!("# Ralph Progress Log\nStarted: {now}\n---\n");
+        let header = format!("# Jodex Progress Log\nStarted: {now}\n---\n");
         std::fs::write(&path, header).with_context(|| "Failed to create progress.txt")?;
     }
     Ok(())
@@ -115,13 +115,13 @@ fn main() {
 
     for i in 1..=cli.max_iterations {
         println!("===============");
-        println!("  Ralph Iteration {i} of {} (claude)", cli.max_iterations);
+        println!("  Jodex Iteration {i} of {} (claude)", cli.max_iterations);
         println!("===============");
 
         match run_iteration(&cli.prompt) {
             Ok(output) => {
                 if output.contains("<promise>COMPLETE</promise>") {
-                    println!("Ralph completed all tasks!");
+                    println!("Jodex completed all tasks!");
                     println!("Completed at iteration {i} of {}", cli.max_iterations);
                     std::process::exit(0);
                 }
@@ -140,7 +140,7 @@ fn main() {
     }
 
     eprintln!(
-        "Ralph reached max iterations ({}) without completing all tasks.",
+        "Jodex reached max iterations ({}) without completing all tasks.",
         cli.max_iterations
     );
     std::process::exit(1);
