@@ -97,6 +97,7 @@ This thread ensures every line of code serves a business purpose.
 Generate the PRD with these sections:
 
 ### 1. Overview
+- **Feature ID:** `<id>` (e.g., 001, 2026-02-17)
 - **Feature Name:** Clear, descriptive title
 - **Business Objective:** The "why" - what business goal does this support?
 - **Success Metric:** How will we measure success? (Be specific)
@@ -248,9 +249,25 @@ This maintains the golden thread from code to business value.
 ### File Naming & Location
 
 - **Format:** Markdown (`.md`)
-- **Location:** `docs/` or `tasks/`
-- **Filename:** `prd-[feature-name].md` (kebab-case)
-- Example: `prd-one-click-checkout.md`
+- **Location:** `prd/<id>_<name>/`
+- **Filename:** `PRD.md`
+
+**Feature ID (`<id>`) Guidelines:**
+- Use 3-digit sequential numbers: `001`, `002`, `003`
+- Check existing `prd/` directory for the highest number
+- Increment by 1 for new features
+- Alternative: Use date-based IDs: `2026-02-17` or `20260217`
+
+**Feature Name (`<name>`) Guidelines:**
+- Use kebab-case: lowercase with hyphens
+- Keep concise: 2-4 words maximum
+- Derive from the feature name in Overview section
+- Example: `user-authentication`, `payment-gateway`, `email-notifications`
+
+**Complete Examples:**
+- `prd/001_user-authentication/PRD.md`
+- `prd/002_payment-gateway/PRD.md`
+- `prd/2026-02-17_email-notifications/PRD.md`
 
 ### Output Format
 
@@ -269,7 +286,7 @@ Use Markdown with:
 # PRD: One-Click Checkout
 
 ## Overview
-
+**Feature ID:** 009
 **Feature Name:** One-Click Checkout for Returning Customers  
 **Business Objective:** Increase checkout conversion rate by 8% (from 65% to 73%)  
 **Success Metric:** Checkout completion time reduced from 2:30 to <1:00 for returning users

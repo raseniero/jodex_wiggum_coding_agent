@@ -1,104 +1,70 @@
-# Jodex Agent Instructions
+# CLAUDE.md
 
-You are an autonomous coding agent working on a software project.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Your Task
+## Project Overview
 
-1. Read the PRD at `prd.json` (in the same directory as this file)
-2. Read the progress log at `progress.txt` (check Codebase Patterns section first)
-3. Check you're on the correct branch from PRD `branchName`. If not, check it out or create from main.
-4. Pick the **highest priority** user story where `passes: false`
-5. Implement that single user story
-6. Run quality checks (e.g., typecheck, lint, test - use whatever your project requires)
-7. Update CLAUDE.md files if you discover reusable patterns (see below)
-8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Story Title]`
-9. Update the PRD to set `passes: true` for the completed story
-10. Append your progress to `progress.txt`
+Jodex Wiggum Loop RS is a Rust CLI that implements an autonomous agent loop. It reads a `prd.json` file, invokes `claude --dangerously-skip-permissions --print` iteratively, detects the `<promise>COMPLETE</promise>` completion signal, and tracks progress in `progress.txt`.
 
-## Progress Report Format
+The binary is named `jodex`. It requires the `claude` CLI to be installed and on PATH.
 
-APPEND to progress.txt (never replace, always append):
-```
-## [Date/Time] - [Story ID]
-- What was implemented
-- Files changed
-- **Learnings for future iterations:**
-  - Patterns discovered (e.g., "this codebase uses X for Y")
-  - Gotchas encountered (e.g., "don't forget to update Z when changing W")
-  - Useful context (e.g., "the evaluation panel is in component X")
----
+## Build & Development Commands
+
+```bash
+cargo build                        # Debug build
+cargo build --release              # Optimized release build
+cargo check                        # Type-check without building
+cargo clippy                       # Lint
+cargo test                         # Run all tests
+cargo test -- --nocapture          # Run tests with stdout visible
+cargo test missing_prd             # Run a single test by name substring
 ```
 
-The learnings section is critical - it helps future iterations avoid repeating mistakes and understand the codebase better.
-
-## Consolidate Patterns
-
-If you discover a **reusable pattern** that future iterations should know, add it to the `## Codebase Patterns` section at the TOP of progress.txt (create it if it doesn't exist). This section should consolidate the most important learnings:
-
-```
-## Codebase Patterns
-- Example: Use `sql<number>` template for aggregations
-- Example: Always use `IF NOT EXISTS` for migrations
-- Example: Export types from actions.ts for UI components
+Apple Silicon optimized build:
+```bash
+RUSTFLAGS="-C target-cpu=native" cargo build --release
 ```
 
-Only add patterns that are **general and reusable**, not story-specific details.
+## Running
 
-## Update CLAUDE.md Files
+```bash
+jodex                              # Default: 10 iterations, reads CLAUDE.md as prompt
+jodex 20                           # 20 iterations
+jodex --prompt path/to/prompt.md   # Custom prompt file
+```
 
-Before committing, check if any edited files have learnings worth preserving in nearby CLAUDE.md files:
+Exit code 0 = all tasks complete. Exit code 1 = error or max iterations reached.
 
-1. **Identify directories with edited files** - Look at which directories you modified
-2. **Check for existing CLAUDE.md** - Look for CLAUDE.md in those directories or parent directories
-3. **Add valuable learnings** - If you discovered something future developers/agents should know:
-   - API patterns or conventions specific to that module
-   - Gotchas or non-obvious requirements
-   - Dependencies between files
-   - Testing approaches for that area
-   - Configuration or environment requirements
+## Architecture
 
-**Examples of good CLAUDE.md additions:**
-- "When modifying X, also update Y to keep them in sync"
-- "This module uses pattern Z for all API calls"
-- "Tests require the dev server running on PORT 3000"
-- "Field names must match the template exactly"
+Single-file binary at `src/main.rs` (~147 lines). No library crate, no modules.
 
-**Do NOT add:**
-- Story-specific implementation details
-- Temporary debugging notes
-- Information already in progress.txt
+**Core flow:**
+1. `load_prd()` — deserializes `prd.json` (camelCase JSON → snake_case Rust via serde)
+2. `init_progress_file()` — creates `progress.txt` with timestamp header if missing
+3. Main loop runs up to `max_iterations`:
+   - `run_iteration()` — reads prompt file, spawns `claude` subprocess, pipes prompt via stdin, streams stdout line-by-line while accumulating output
+   - Checks accumulated output for `<promise>COMPLETE</promise>`
+   - 2-second sleep between iterations
 
-Only update CLAUDE.md if you have **genuinely reusable knowledge** that would help future work in that directory.
+**Key patterns:**
+- `anyhow::Result` everywhere; main catches errors with `eprintln!` + `exit(1)`
+- `#[serde(rename_all = "camelCase")]` on PRD structs to match JSON field names
+- `child.stdin.take()` to write then drop stdin (signals EOF to subprocess)
+- `Stdio::inherit()` on stderr for real-time pass-through
+- CLI parsing via `clap` derive API
 
-## Quality Requirements
+## Testing
 
-- ALL commits must pass your project's quality checks (typecheck, lint, test)
-- Do NOT commit broken code
-- Keep changes focused and minimal
-- Follow existing code patterns
+Integration tests in `tests/cli.rs` use `assert_cmd` + `predicates`. Tests isolate from the project's own `prd.json` by running in a temp directory via `current_dir()`.
 
-## Browser Testing (If Available)
+## Key Directories
 
-For any story that changes UI, verify it works in the browser if you have browser testing tools configured (e.g., via MCP):
+- `scripts/jodex/` — operational directory with its own `prd.json`, `CLAUDE.md`, and `progress.txt` for running Jodex on itself
+- `skills/` — agent skill templates (PRD generation, BRD/PRD, TDS)
+- `skills/CLAUDE/CLAUDE.md` — advanced agent prompt template with PR creation support
+- `ai_docs/ralph_wiggum_loop/` — documentation on the Ralph autonomous loop pattern
 
-1. Navigate to the relevant page
-2. Verify the UI changes work as expected
-3. Take a screenshot if helpful for the progress log
+## Release Profile
 
-If no browser tools are available, note in your progress report that manual browser verification is needed.
-
-## Stop Condition
-
-After completing a user story, check if ALL stories have `passes: true`.
-
-If ALL stories are complete and passing, reply with:
-<promise>COMPLETE</promise>
-
-If there are still stories with `passes: false`, end your response normally (another iteration will pick up the next story).
-
-## Important
-
-- Work on ONE story per iteration
-- Commit frequently
-- Keep CI green
-- Read the Codebase Patterns section in progress.txt before starting
+`Cargo.toml` has an aggressive release profile: `opt-level = 3`, `lto = true`, `codegen-units = 1`, `strip = true`, `panic = "abort"`.
