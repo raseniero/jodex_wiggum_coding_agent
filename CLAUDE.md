@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Jodex Wiggum Loop RS is a Rust CLI that implements an autonomous agent loop. It reads a `prd.json` file, invokes `claude --dangerously-skip-permissions --print` iteratively, detects the `<promise>COMPLETE</promise>` completion signal, and tracks progress in `progress.txt`.
 
-The binary is named `jodex`. It requires the `claude` CLI to be installed and on PATH.
+The binary is named `jodex`. Prerequisites: Rust toolchain (stable, via rustup) and `claude` CLI installed and on PATH.
 
 ## Build & Development Commands
 
@@ -28,6 +28,8 @@ RUSTFLAGS="-C target-cpu=native" cargo build --release
 ## Running
 
 ```bash
+cargo run                          # Run via cargo (debug build)
+cargo run -- 20                    # Pass args via cargo
 jodex                              # Default: 10 iterations, reads CLAUDE.md as prompt
 jodex 20                           # 20 iterations
 jodex --prompt path/to/prompt.md   # Custom prompt file
@@ -58,12 +60,28 @@ Single-file binary at `src/main.rs` (~147 lines). No library crate, no modules.
 
 Integration tests in `tests/cli.rs` use `assert_cmd` + `predicates`. Tests isolate from the project's own `prd.json` by running in a temp directory via `current_dir()`.
 
+## prd.json Schema
+
+The tool expects `prd.json` in the working directory with this structure (camelCase in JSON, mapped to snake_case in Rust via serde):
+
+```json
+{
+  "featureName": "string",
+  "userStories": [
+    { "id": "US-001", "title": "string", "passes": false }
+  ]
+}
+```
+
+Additional fields (`project`, `featureId`, `description`, `detailedPrdPath`, `acceptanceCriteria`, `priority`, `notes`) are present in practice but not deserialized by the Rust binary — only `featureName` and `userStories` (with `id`, `title`, `passes`) are required by the struct definitions.
+
 ## Key Directories
 
-- `scripts/jodex/` — operational directory with its own `prd.json`, `CLAUDE.md`, and `progress.txt` for running Jodex on itself
-- `skills/` — agent skill templates (PRD generation, BRD/PRD, TDS)
-- `skills/CLAUDE/CLAUDE.md` — advanced agent prompt template with PR creation support
-- `ai_docs/ralph_wiggum_loop/` — documentation on the Ralph autonomous loop pattern
+- `scripts/jodex/` — operational directory for running Jodex on itself; contains `prd.json`, `PRD.md`, `CLAUDE.md` (agent prompt), `prompt.md`, `jodex.sh`, and `progress.txt`
+- `scripts/jodex/jodex.sh` — bash predecessor of the Rust binary; has features not yet ported to Rust: `amp` tool support via `--tool` flag, branch archiving logic
+- `skills/` — Claude Code skill templates (`jodex-gen-*` namespace) for PRD, BRD/PRD, PRD-lite, PRD-task, and TDS generation
+- `skills/CLAUDE/CLAUDE.md` — reusable agent prompt template defining the autonomous loop protocol (read PRD → pick story → implement → commit → push branch → open PR → check `<promise>COMPLETE</promise>`). This is the prompt the Rust binary pipes to Claude via stdin.
+- `ai_docs/ralph_wiggum_loop/` — documentation and flowchart on the Ralph autonomous loop pattern
 
 ## Release Profile
 
